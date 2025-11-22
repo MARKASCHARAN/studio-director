@@ -1,5 +1,28 @@
-fastapi
-uvicorn[standard]
-pydantic
-requests
-boto3
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-dotenv==1.0.1
+pydantic==2.9.0
+pydantic-settings==2.4.0
+requests==2.32.3
+python-multipart==0.0.9
+
+
+
+# JSON handling / validation
+orjson==3.10.3
+jsonschema==4.21.1
+
+
+# Image handling
+Pillow==10.4.0
+
+
+# Logging & utilities
+loguru==0.7.2
+
+
+# If you test local HuggingFace or VLM later
+transformers==4.45.0
+accelerate==0.33.0
+diffusers==0.30.0
+torch==2.3.0

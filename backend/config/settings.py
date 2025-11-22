@@ -1,7 +1,16 @@
-from pydantic import BaseSettings
+import os
+from dotenv import load_dotenv
 
-class Settings(BaseSettings):
-    api_key: str | None = None
-    fibo_url: str = 'https://api.fibo.example'
+# Load correct environment file
+ENV = os.getenv("ENV", "local")
+
+if ENV == "production":
+    load_dotenv(".env.production")
+else:
+    load_dotenv(".env.local")
+
+class Settings:
+    BRIA_API_KEY: str = os.getenv("BRIA_API_KEY")
+    ENV: str = ENV
 
 settings = Settings()
