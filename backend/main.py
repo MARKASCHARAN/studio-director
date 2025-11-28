@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from typing import Any, Dict
 import traceback
 import json   # ✅ FIXED – needed for json.dumps
+from services.vlm_client import client
+
 
 from config.settings import settings
 from services.vlm_client import (
@@ -133,21 +135,36 @@ async def refine(req: RefineRequest):
 
 
 # 4) INSPIRE FLOW
-@app.post("/inspire", response_model=InspireResponse)
+@app.post("/inspire", summary="Image → JSON → Image", response_model=InspireResponse)
 async def inspire(image: UploadFile = File(...)):
 
-    # Convert image → structured JSON via VLM
-    json_prompt = image_to_json(image)
-
-    # Generate from JSON
     try:
-        result = await generate_image_and_wait({
-            "structured_prompt": json.dumps(json_prompt)
-        })
+        # Step 1: Convert Image → JSON dict
+        json_prompt = image_to_json(image)
+
+        # Step 2: Convert dict → STRING (Bria requires string!)
+        structured_prompt_str = json.dumps(json_prompt, ensure_ascii=False)
+
+        bria_request = {
+            "structured_prompt": structured_prompt_str
+        }
+
+        # Step 3: Generate image with Bria
+        result = await generate_image_and_wait(bria_request)
+
+        return {
+            "image_url": result["image_url"],
+            "json": json_prompt
+        }
+
     except Exception as e:
+        print("INSPIRE ERROR:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {
-        "image_url": result["image_url"],
-        "json": json_prompt
-    }
+@app.get("/list-models")
+def list_models():
+    try:
+        result = client.models.list()  # call Gemini API
+        return [m.name for m in result]
+    except Exception as e:
+        return {"error": str(e)}
