@@ -160,6 +160,44 @@ async def inspire(image: UploadFile = File(...)):
     except Exception as e:
         print("INSPIRE ERROR:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+
+
+
+
+
+
+@app.post("/multi-shot", response_model=MultiShotResponse)
+async def multi_shot(image: UploadFile = File(...), req: MultiShotRequest = None):
+
+    try:
+        # Step 1: Extract scene JSON
+        base_json = image_to_json(image)
+
+        shots_output = []
+
+        for shot_type in req.shot_types:
+            # Step 2: Agent transforms JSON for the shot
+            shot_json = generate_shot_json(base_json, shot_type)
+
+            # Step 3: Bria generates image from new JSON
+            result = await generate_image_and_wait({
+                "structured_prompt": json.dumps(shot_json)
+            })
+
+            shots_output.append({
+                "type": shot_type,
+                "image_url": result["image_url"],
+                "json": shot_json
+            })
+
+        return {"shots": shots_output}
+
+    except Exception as e:
+        print("MULTI-SHOT ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+# 5) LIST MODELS
 
 @app.get("/list-models")
 def list_models():
@@ -168,3 +206,5 @@ def list_models():
         return [m.name for m in result]
     except Exception as e:
         return {"error": str(e)}
+
+
