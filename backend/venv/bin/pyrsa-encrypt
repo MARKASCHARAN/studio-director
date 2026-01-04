@@ -1,4 +1,4 @@
-#!/Users/markasaicharan/PROJECTS/studio-director/backend/venv/bin/python3.11
+#!/Users/markasaicharan/hackathons/studio-director/backend/venv/bin/python3
 import sys
 from rsa.cli import encrypt
 if __name__ == '__main__':
